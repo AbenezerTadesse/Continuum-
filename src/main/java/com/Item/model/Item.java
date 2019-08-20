@@ -1,6 +1,11 @@
 package com.Item.model;
 
 
+import com.Item.View.Views;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,11 +13,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,16 +26,20 @@ public class Item {
     @Column(name = "ITEM_ID", insertable = false)
     private Integer Id;
 
+    @JsonView(Views.Modified.class) //added on itemName and List of subItems. Customize serialized attributes of Item
     @Column(name="ITEM_NAME")
     private String itemName;
 
+    @JsonBackReference  //to omit from serialization. Avoids stackOverFlow
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="SUB_ITEM_OF_ID")
     private Item subItemOf;
 
+    @JsonManagedReference //serialize this so that subItems are printed out under parent Item
+    @JsonView(Views.Modified.class)
     @OneToMany(mappedBy = "subItemOf")
     @OrderBy("itemName asc")
-    private List <Item> subItem = new ArrayList<Item>();
+    private List <Item> subItem ;
 
     public Item(){
         super();
@@ -45,11 +52,7 @@ public class Item {
         this.subItem = subItemList;
     }
 
-    /*public Item(int _id, String _itemName, List _subItem){
-        this.Id = _id;
-        this.itemName = _itemName;
-        this.subItem = _subItem;
-    }*/
+
 
     public Integer getId() {
         return Id;
